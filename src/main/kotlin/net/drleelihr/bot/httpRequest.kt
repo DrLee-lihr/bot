@@ -13,9 +13,8 @@ suspend fun httpRequest(host:String): String? {
     val response = call.execute()
     if(response.isSuccessful) {
         val body = response.body
-        val string: String? = body?.string()
-        println(string)
-        return string
+        //println(body?.string)
+        return body?.string()
     }
     else throw(NullPointerException("Request failed,status code:${response.code}"))
 }
