@@ -1,9 +1,17 @@
 package net.drleelihr.bot.command
 
+import net.drleelihr.bot.downloadImage
 import net.drleelihr.bot.httpRequest
+import net.drleelihr.bot.projectPath
 import net.drleelihr.bot.send
 import net.mamoe.mirai.event.events.GroupMessageEvent
+import net.mamoe.mirai.message.data.Image
+import net.mamoe.mirai.message.data.MessageChainBuilder
+import net.mamoe.mirai.message.data.PlainText
+import net.mamoe.mirai.message.data.messageChainOf
+import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import org.json.JSONArray
+import java.io.File
 
 
 suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
@@ -26,6 +34,9 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
             "白","rem","re:master","remaster" -> 4
             else -> -1
         }
+    }
+    val difficultyStandardize= { a: String ->
+        difficultyLevelTransform(difficultyIDTransform(a))
     }
     val songData=JSONArray(httpRequest("https://www.diving-fish.com/api/maimaidxprober/music_data"))
     val totalSongNum=songData.length()
@@ -111,18 +122,61 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
             send(event,result)
         }
         else -> {
-            //TODO 曲绘上传
+            commandContent.add(commandContent.size,"")
             var result:String=""
-            var difficultyID=-1
-            if(commandContent.size>2){
-                difficultyID=difficultyIDTransform(commandContent[3])
+            var resultHead:String=""
+            var difficultyID=difficultyIDTransform(commandContent[1])
+            var song=songData.getJSONObject(359)//你好，这是我最爱的监狱
+            for(index in (0 until totalSongNum)){
+                if(songData.getJSONObject(index).getInt("id")==commandContent[0].toInt()){
+                    song=songData.getJSONObject(index)
+                }
             }
+            var songImageFile:File=File("$projectPath\\cache\\${song.getString("id")}.jpg")
+            var songImage: Image =
+                if(!songImageFile.exists())
+                        (downloadImage("https://www.diving-fish.com/covers/${song.getString("id")}.jpg",songImageFile)
+                        .uploadAsImage(event.group,"jpg"))
+                else (songImageFile.uploadAsImage(event.group,"jpg"))
+            val basicInfo=song.getJSONObject("basic_info")
             if(difficultyID==-1){
-
+                resultHead="${song.getString("id")}.${song.getString("title")}<${song.getString("type")}>\n"
+                result="""
+                    artist: ${basicInfo.getString("artist")}
+                    genre: ${basicInfo.getString("genre")}
+                    BPM: ${basicInfo.getInt("bpm")}
+                    version: ${basicInfo.getString("from")}
+                """.trimIndent()
             }
             else{
-
+                val chartInfo=song.getJSONArray("charts").getJSONObject(difficultyIDTransform(commandContent[1]))
+                val noteInfo=chartInfo.getJSONArray("notes")
+                resultHead="${song.getString("id")}.${song.getString("title")}<${song.getString("type")}>" +
+                        "[${difficultyStandardize(commandContent[1])}]\n"
+                result=if(song.getString("type")=="DX")
+                    """
+                        TAP: ${noteInfo.getInt(0)}
+                        HOLD: ${noteInfo.getInt(1)}
+                        SLIDE: ${noteInfo.getInt(2)}
+                        TOUCH: ${noteInfo.getInt(3)}
+                        BREAK: ${noteInfo.getInt(4)}
+                        charter: ${chartInfo.getString("charter")}
+                    """.trimIndent()
+                else
+                    """
+                        TAP: ${noteInfo.getInt(0)}
+                        HOLD: ${noteInfo.getInt(1)}
+                        SLIDE: ${noteInfo.getInt(2)}
+                        BREAK: ${noteInfo.getInt(3)}
+                        charter: ${chartInfo.getString("charter")}
+                    """.trimIndent()
             }
+            val messageChain=MessageChainBuilder()
+                    .append(resultHead)
+                    .append(songImage)
+                    .append(result)
+                    .build()
+            send(event,messageChain)
         }
     }
 }

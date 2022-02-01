@@ -13,7 +13,10 @@ import net.mamoe.mirai.alsoLogin
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.utils.BotConfiguration
+import java.nio.file.Path
+import kotlin.io.path.Path
 
+val projectPath: Path = Path("D:\\Dev\\bot")
 
 var regexCommandList = mutableMapOf(
     Regex("\\[\\[.*?]]") to ::regexWiki,
