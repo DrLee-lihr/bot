@@ -11,6 +11,8 @@ import net.drleelihr.bot.command.wiki
 import net.mamoe.mirai.BotFactory
 import net.mamoe.mirai.alsoLogin
 import net.mamoe.mirai.event.events.GroupMessageEvent
+import net.mamoe.mirai.message.data.Image
+import net.mamoe.mirai.message.data.MessageSource.Key.recall
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.utils.BotConfiguration
 import java.nio.file.Path

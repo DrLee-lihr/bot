@@ -12,6 +12,8 @@ import net.mamoe.mirai.message.data.messageChainOf
 import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import org.json.JSONArray
 import java.io.File
+import java.lang.Math.floor
+import kotlin.math.floor
 
 
 suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
@@ -25,12 +27,23 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
             else -> "Original"
         }
     }
+    val difficultyFullLevelTransform= { a: Int ->
+        when (a) {
+            0 -> "Basic"
+            1 -> "Advanced"
+            2 -> "Expert"
+            3 -> "Master"
+            4 -> "Re:Master"
+            else -> "Original"
+        }
+    }
+    val dxs2LevelTransform = { it:Float -> "${floor(it).toInt()}${if(it-floor(it)>=0.65)"+" else ""}" }
     val difficultyIDTransform= { a: String ->
         when (a.lowercase()) {
-            "绿","bsc","basic" -> 0
+            "绿","bsc","basic","bas" -> 0
             "黄","adv","advanced" -> 1
             "红","exp","expert" -> 2
-            "紫","mst","master" -> 3
+            "紫","mst","master","mas" -> 3
             "白","rem","re:master","remaster" -> 4
             else -> -1
         }
@@ -58,6 +71,11 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
             send(event,result)
         }
         "search" -> {
+            try {
+                for(index in 2 until commandContent.size)
+                    commandContent[1]+=(" "+commandContent[index])
+            }
+            catch (e:Exception) {}
             var result:String=""
             var limit:Int=0
             for(index in (0 until totalSongNum)){
@@ -114,9 +132,7 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
                                     "[${difficultyLevelTransform(levelID)}](${song.getJSONArray("ds").getFloat(levelID)})\n"
                         }
                     }
-                    catch(e:Exception){
-                        continue
-                    }
+                    catch(e:Exception){ continue }
                 }
             }
             send(event,result)
@@ -124,6 +140,7 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
         else -> {
             commandContent.add(commandContent.size,"")
             var result:String=""
+            var resultDifficulty:String=""
             var resultHead:String=""
             var difficultyID=difficultyIDTransform(commandContent[1])
             var song=songData.getJSONObject(359)//你好，这是我最爱的监狱
@@ -136,11 +153,14 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
             var songImage: Image =
                 if(!songImageFile.exists())
                         (downloadImage("https://www.diving-fish.com/covers/${song.getString("id")}.jpg",songImageFile)
-                        .uploadAsImage(event.group,"jpg"))
-                else (songImageFile.uploadAsImage(event.group,"jpg"))
+                        .uploadAsImage(event.group))
+                else (songImageFile.uploadAsImage(event.group))
             val basicInfo=song.getJSONObject("basic_info")
+            val dxsInfo=song.getJSONArray("ds")
             if(difficultyID==-1){
                 resultHead="${song.getString("id")}.${song.getString("title")}<${song.getString("type")}>\n"
+                resultDifficulty="${dxsInfo.getFloat(0)}/${dxsInfo.getFloat(1)}/${dxsInfo.getFloat(2)}/" +
+                        "${dxsInfo.getFloat(3)}${if(dxsInfo.length()==5)"/${dxsInfo.getFloat(4)}" else ""}\n"
                 result="""
                     artist: ${basicInfo.getString("artist")}
                     genre: ${basicInfo.getString("genre")}
@@ -151,8 +171,10 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
             else{
                 val chartInfo=song.getJSONArray("charts").getJSONObject(difficultyIDTransform(commandContent[1]))
                 val noteInfo=chartInfo.getJSONArray("notes")
-                resultHead="${song.getString("id")}.${song.getString("title")}<${song.getString("type")}>" +
-                        "[${difficultyStandardize(commandContent[1])}]\n"
+                resultHead="${song.getString("id")}.${song.getString("title")}<${song.getString("type")}>\n"
+                resultDifficulty="${difficultyFullLevelTransform(difficultyIDTransform(commandContent[1]))} " +
+                        dxs2LevelTransform(song.getJSONArray("ds").getFloat(difficultyIDTransform(commandContent[1]))) +
+                        " (${song.getJSONArray("ds").getFloat(difficultyIDTransform(commandContent[1]))})\n"
                 result=if(song.getString("type")=="DX")
                     """
                         TAP: ${noteInfo.getInt(0)}
@@ -174,6 +196,7 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
             val messageChain=MessageChainBuilder()
                     .append(resultHead)
                     .append(songImage)
+                    .append(resultDifficulty)
                     .append(result)
                     .build()
             send(event,messageChain)
