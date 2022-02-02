@@ -34,7 +34,7 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
             else -> "Original"
         }
     }
-    val dxs2LevelTransform = { it:Float -> "${floor(it).toInt()}${if(it-floor(it)>=0.65)"+" else ""}" }
+    val dxs2LevelTransform: (Float) -> String = { "${floor(it).toInt()}${if(it-floor(it)>=0.65)"+" else ""}" }
     val difficultyIDTransform= { a: String ->
         when (a.lowercase()) {
             "绿","bsc","basic","bas" -> 0
@@ -44,9 +44,6 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
             "白","rem","re:master","remaster" -> 4
             else -> -1
         }
-    }
-    val difficultyStandardize= { a: String ->
-        difficultyLevelTransform(difficultyIDTransform(a))
     }
     val songData=JSONArray(httpRequest("https://www.diving-fish.com/api/maimaidxprober/music_data"))
     val totalSongNum=songData.length()
