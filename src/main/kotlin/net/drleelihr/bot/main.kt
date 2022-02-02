@@ -8,11 +8,15 @@ package net.drleelihr.bot
 import net.drleelihr.bot.command.maisong
 import net.drleelihr.bot.command.regexWiki
 import net.drleelihr.bot.command.wiki
+import net.mamoe.mirai.Bot
 import net.mamoe.mirai.BotFactory
 import net.mamoe.mirai.alsoLogin
 import net.mamoe.mirai.event.events.GroupMessageEvent
+import net.mamoe.mirai.message.code.MiraiCode
+import net.mamoe.mirai.message.code.MiraiCode.deserializeMiraiCode
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.MessageSource.Key.recall
+import net.mamoe.mirai.message.data.buildForwardMessage
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.utils.BotConfiguration
 import java.nio.file.Path
@@ -26,7 +30,8 @@ var regexCommandList = mutableMapOf(
 
 var commandList = mutableMapOf(
     "wiki" to ::wiki,
-    "maisong" to ::maisong
+    "maisong" to ::maisong,
+    "m" to ::maisong,
 )
 
 suspend fun commandCheck(event:GroupMessageEvent){
@@ -52,13 +57,12 @@ suspend fun commandCheck(event:GroupMessageEvent){
 }
 
 suspend fun main() {
-    val qqId = 3538158187L//Bot的QQ号，需为Long类型，在结尾处添加大写L
+    val qqId = 3538158187L
     val password = readLine()!!
     val bot = BotFactory.newBot(qqId, password) {
         fileBasedDeviceInfo()
         protocol = BotConfiguration.MiraiProtocol.ANDROID_PHONE
-    }.alsoLogin()//新建Bot并登录
-    val sevenClassGroup=bot.getGroup(834714536)
-    val abuseBotGroup=bot.getGroup(1044813316)
+    }.alsoLogin()
+    val abuseBotGroup= bot.getGroup(921834695L)
     bot.eventChannel.subscribeAlways<GroupMessageEvent> { event -> commandCheck(event) }
 }

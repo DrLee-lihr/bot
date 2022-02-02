@@ -7,12 +7,9 @@ import net.drleelihr.bot.send
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.MessageChainBuilder
-import net.mamoe.mirai.message.data.PlainText
-import net.mamoe.mirai.message.data.messageChainOf
 import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import org.json.JSONArray
 import java.io.File
-import java.lang.Math.floor
 import kotlin.math.floor
 
 
@@ -63,12 +60,12 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
                 for(chartIndex in 0 until 5)
                     try{
                         if(base.getFloat(chartIndex)==requireBase)
-                        result+="${song.getString("id")}.${song.getString("title")}<${song.getString("type")}>" +
+                        result+="${song.getString("id")}.${song.getString("title")}(${song.getString("type")})" +
                                 "[${difficultyLevelTransform(chartIndex)}]\n"
                     }
                     catch(e:Exception){ continue }
             }
-            send(event,result)
+            send(event,result,"定数为${commandContent[1]}")
         }
         "search" -> {
             try {
@@ -83,15 +80,15 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
                 if (song.getString("title").lowercase().contains(commandContent[1].lowercase())||
                         song.getJSONObject("basic_info").getString("artist").lowercase()
                             .contains(commandContent[1].lowercase())){
-                    result+="${song.getString("id")}.${song.getString("title")}<${song.getString("type")}>\n"
+                    result+="${song.getString("id")}.${song.getString("title")}(${song.getString("type")})\n"
                     limit++
                 }
-                if(limit>=50){
-                    result="条目过多，请缩小查询范围（结果大于50条）"
+                if(limit>100){
+                    result="条目过多，请缩小查询范围（结果大于100条）"
                     break
                 }
             }
-            send(event,result)
+            send(event,result,"有关“${commandContent[1]}”")
         }
         "bpm" -> {
             var result:String=""
@@ -99,28 +96,35 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
                 for(index in (0 until totalSongNum)){
                     val song=songData.getJSONObject(index)
                     if (song.getJSONObject("basic_info").getInt("bpm")==commandContent[1].toInt()){
-                        result+="${song.getString("id")}.${song.getString("title")}<${song.getString("type")}>\n"
+                        result+="${song.getString("id")}.${song.getString("title")}(${song.getString("type")})\n"
                     }
                 }
             else {
                 var limit:Int=0
+                if(commandContent.size<=2)commandContent.add(commandContent[1])
                 for (index in (0 until totalSongNum)) {
                     val song = songData.getJSONObject(index)
                     if (song.getJSONObject("basic_info").getInt("bpm") in
-                            commandContent[1].toInt() until commandContent[2].toInt()+1) {
-                        result += "${song.getString("id")}.${song.getString("title")}<${song.getString("type")}>\n"
+                            commandContent[1].toInt()..commandContent[2].toInt()) {
+                        result += "${song.getString("id")}.${song.getString("title")}(${song.getString("type")})\n"
                         limit++
                     }
-                    if(limit>=50){
-                        result="条目过多，请缩小查询范围（结果大于50条）"
+                    if(limit>100){
+                        result="条目过多，请缩小查询范围（结果大于100条）"
                         break
                     }
                 }
             }
-            send(event,result)
+            send(event,result,if(commandContent[1]==commandContent[2])"BPM为${commandContent[1]}"
+                                else "BPM介于${commandContent[1]}和${commandContent[2]}")
         }
         "charter" -> {
             var result:String=""
+            try {
+                for(index in 2 until commandContent.size)
+                    commandContent[1]+=(" "+commandContent[index])
+            }
+            catch (e:Exception) {}
             for(index in 0 until totalSongNum){
                 val song=songData.getJSONObject(index)
                 val songCharts=song.getJSONArray("charts")
@@ -128,29 +132,31 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
                     try{
                         if(songCharts.getJSONObject(levelID).getString("charter").lowercase()
                                 .contains(commandContent[1].lowercase())){
-                            result+="${song.getString("id")}.${song.getString("title")}<${song.getString("type")}>" +
+                            result+="${song.getString("id")}.${song.getString("title")}(${song.getString("type")})" +
                                     "[${difficultyLevelTransform(levelID)}](${song.getJSONArray("ds").getFloat(levelID)})\n"
                         }
                     }
                     catch(e:Exception){ continue }
                 }
             }
-            send(event,result)
+            send(event,result,"谱师为${commandContent[1]}")
         }
         else -> {
             commandContent.add(commandContent.size,"")
             var result:String=""
             var resultDifficulty:String=""
             var resultHead:String=""
-            var difficultyID=difficultyIDTransform(commandContent[1])
+            val difficultyID=difficultyIDTransform(commandContent[1])
             var song=songData.getJSONObject(359)//你好，这是我最爱的监狱
+            var isValidID=false
             for(index in (0 until totalSongNum)){
                 if(songData.getJSONObject(index).getInt("id")==commandContent[0].toInt()){
                     song=songData.getJSONObject(index)
+                    isValidID=true
                 }
             }
-            var songImageFile:File=File("$projectPath\\cache\\${song.getString("id")}.jpg")
-            var songImage: Image =
+            val songImageFile:File=File("$projectPath\\cache\\${song.getString("id")}.jpg")
+            val songImage: Image =
                 if(!songImageFile.exists())
                         (downloadImage("https://www.diving-fish.com/covers/${song.getString("id")}.jpg",songImageFile)
                         .uploadAsImage(event.group))
@@ -158,7 +164,7 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
             val basicInfo=song.getJSONObject("basic_info")
             val dxsInfo=song.getJSONArray("ds")
             if(difficultyID==-1){
-                resultHead="${song.getString("id")}.${song.getString("title")}<${song.getString("type")}>\n"
+                resultHead="${song.getString("id")}.${song.getString("title")}(${song.getString("type")})\n"
                 resultDifficulty="${dxsInfo.getFloat(0)}/${dxsInfo.getFloat(1)}/${dxsInfo.getFloat(2)}/" +
                         "${dxsInfo.getFloat(3)}${if(dxsInfo.length()==5)"/${dxsInfo.getFloat(4)}" else ""}\n"
                 result="""
@@ -171,7 +177,7 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
             else{
                 val chartInfo=song.getJSONArray("charts").getJSONObject(difficultyIDTransform(commandContent[1]))
                 val noteInfo=chartInfo.getJSONArray("notes")
-                resultHead="${song.getString("id")}.${song.getString("title")}<${song.getString("type")}>\n"
+                resultHead="${song.getString("id")}.${song.getString("title")}(${song.getString("type")})\n"
                 resultDifficulty="${difficultyFullLevelTransform(difficultyIDTransform(commandContent[1]))} " +
                         dxs2LevelTransform(song.getJSONArray("ds").getFloat(difficultyIDTransform(commandContent[1]))) +
                         " (${song.getJSONArray("ds").getFloat(difficultyIDTransform(commandContent[1]))})\n"
@@ -192,6 +198,9 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
                         BREAK: ${noteInfo.getInt(3)}
                         charter: ${chartInfo.getString("charter")}
                     """.trimIndent()
+            }
+            if(!isValidID){
+                result+="\n(id无效，自动返回监狱)"
             }
             val messageChain=MessageChainBuilder()
                     .append(resultHead)
