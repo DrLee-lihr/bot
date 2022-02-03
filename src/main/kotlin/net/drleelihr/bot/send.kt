@@ -12,8 +12,6 @@ class SongListDisplayStrategy(private val title: String) : ForwardMessage.Displa
 
     override fun generateBrief(forward: RawForwardMessage): String = "[曲目列表]"
 
-    override fun generateSummary(forward: RawForwardMessage): String = "查看${forward.nodeList.size}首曲目（谱面）"
-
 }
 
 
