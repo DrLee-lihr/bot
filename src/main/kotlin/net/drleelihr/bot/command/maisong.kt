@@ -9,14 +9,12 @@ import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.MessageChainBuilder
 import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import org.json.JSONArray
-import org.w3c.dom.ranges.Range
 import java.io.File
 import java.time.Instant
 import kotlin.math.floor
-import kotlin.time.measureTimedValue
 
-val difficultyLevelTransform= { a: Int ->
-    when (a) {
+fun difficultyLevelTransform(a:Int):String{
+    return when (a) {
         0 -> "BSC"
         1 -> "ADV"
         2 -> "EXP"
@@ -25,8 +23,8 @@ val difficultyLevelTransform= { a: Int ->
         else -> "Original"
     }
 }
-val difficultyFullLevelTransform= { a: Int ->
-    when (a) {
+fun difficultyFullLevelTransform(a:Int):String {
+    return when (a) {
         0 -> "Basic"
         1 -> "Advanced"
         2 -> "Expert"
@@ -42,8 +40,8 @@ infix fun Float.inLevel(s:String) : Boolean  {
     else if(s.contains("+")||s.contains("＋")) (this>=baseLevel+0.65&&this<=baseLevel+0.95)
     else (this>=baseLevel-0.05&&this<=baseLevel+0.65)
 }
-val difficultyIDTransform= { a: String ->
-    when (a.lowercase()) {
+fun difficultyIDTransform(a:String): Int {
+    return when (a.lowercase()) {
         "绿","bsc","basic","bas" -> 0
         "黄","adv","advanced" -> 1
         "红","exp","expert" -> 2
@@ -57,7 +55,7 @@ val difficultyIDTransform= { a: String ->
 
 suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
 
-    var timeStampRun:File=File("$projectPath\\cache\\RunTime.txt")
+    var timeStampRun=File("$projectPath\\cache\\RunTime.txt")
     var lastRunTime= timeStampRun.readText().toLong()
     timeStampRun.delete()
     timeStampRun.writeText(Instant.now().epochSecond.toString())
@@ -95,9 +93,9 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
                 for(index in 2 until commandContent.size)
                     commandContent[1]+=(" "+commandContent[index])
             }
-            catch (e:Exception) {}
-            var result:String=""
-            var limit:Int=0
+            catch (_:Exception) {}
+            var result=""
+            var limit=0
             for(index in (0 until totalSongNum)){
                 val song=songData.getJSONObject(index)
                 if (song.getString("title").lowercase().contains(commandContent[1].lowercase())||
@@ -115,7 +113,7 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
         }
 
         "bpm" -> {
-            var result:String=""
+            var result=""
             if(commandContent.size<3)
                 for(index in (0 until totalSongNum)){
                     val song=songData.getJSONObject(index)
@@ -125,7 +123,7 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
                 }
 
             else {
-                var limit:Int=0
+                var limit=0
                 if(commandContent.size<=2)commandContent.add(commandContent[1])
                 for (index in (0 until totalSongNum)) {
                     val song = songData.getJSONObject(index)
@@ -145,12 +143,12 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
         }
 
         "charter" -> {
-            var result:String=""
+            var result=""
             try {
                 for(index in 2 until commandContent.size)
                     commandContent[1]+=(" "+commandContent[index])
             }
-            catch (e:Exception) {}
+            catch (_:Exception) {}
             for(index in 0 until totalSongNum){
                 val song=songData.getJSONObject(index)
                 val songCharts=song.getJSONArray("charts")
@@ -171,9 +169,9 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
         else -> {
 
             commandContent.add(commandContent.size,"")
-            var result:String=""
-            var resultDifficulty:String=""
-            var resultHead:String=""
+            var result:String
+            var resultDifficulty:String
+            var resultHead:String
             val difficultyID=difficultyIDTransform(commandContent[1])
             var song=songData.getJSONObject(359)//你好，这是我最爱的监狱
             var isValidID=false
@@ -185,7 +183,7 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
                 }
             }
 
-            val songImageFile:File=File("$projectPath\\cache\\${song.getString("id")}.jpg")
+            val songImageFile=File("$projectPath\\cache\\${song.getString("id")}.jpg")
             val songImage: Image =
                 if(!songImageFile.exists())
                         (downloadImage("https://www.diving-fish.com/covers/${song.getString("id")}.jpg",songImageFile)

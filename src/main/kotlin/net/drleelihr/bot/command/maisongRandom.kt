@@ -1,17 +1,15 @@
 package net.drleelihr.bot.command
 
-import net.mamoe.mirai.event.events.GroupMessageEvent
-import net.drleelihr.bot.command.maisong
 import net.drleelihr.bot.downloadImage
 import net.drleelihr.bot.projectPath
 import net.drleelihr.bot.send
+import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.MessageChainBuilder
 import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import kotlin.random.Random.Default.nextInt
 
 infix fun String.containedBy(father:String):Boolean = father.lowercase().contains(this.lowercase())
 fun String.r()=this.reversed()
@@ -29,13 +27,13 @@ suspend fun maisongRandom(event: GroupMessageEvent, regexList:MutableList<String
 
 private suspend fun random(event: GroupMessageEvent, command:String) {
     println("成功进入查询函数")
-    var songDataCache: File = File("$projectPath\\cache\\songDataCache.json")
+    val songDataCache = File("$projectPath\\cache\\songDataCache.json")
     val songData = JSONArray(songDataCache.readText())
     println("歌曲数据加载完成")
     var arguments = command.substring(2).reversed()
-    var level: String = ""
+    var level = ""
     try {
-        while (arguments[0] in listOf<Char>('1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', '+', '＋', '歌')) {
+        while (arguments[0] in listOf('1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', '+', '＋', '歌')) {
             level += arguments[0]
             arguments = arguments.drop(1)
         }
@@ -80,7 +78,7 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
     )
 
 
-    var songArray: JSONArray = JSONArray()
+    var songArray = JSONArray()
     //songArray.put(songData.getJSONObject(359))
     if (difficulty != null) {
         if (level.contains('.')) {
@@ -115,12 +113,12 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
                 }
             }
         }
-        var songResult=JSONObject()
+        var songResult: JSONObject
         try {
             songResult = songArray.getJSONObject((0 until songArray.length()).random())
         }
         catch (e:NoSuchElementException){
-            send(event, "错误：没有满足条件的曲目。"+if(level in listOf<String>("5+","6+","5＋","6＋"))
+            send(event, "错误：没有满足条件的曲目。"+if(level in listOf("5+","6+","5＋","6＋"))
                 "\n提示：一部分5级和6级曲目虽然小数位大于等于7，但仍标为5级和6级；5+和6+难度不存在；最低的带+的难度是7+。" else "")
             return
         }
@@ -131,7 +129,7 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
                 dxs2LevelTransform(songResult.getJSONArray("ds").getFloat(difficulty)) +
                 " (${songResult.getJSONArray("ds").getFloat(difficulty)})\n"
 
-        val songImageFile: File = File("$projectPath\\cache\\${songResult.getString("id")}.jpg")
+        val songImageFile = File("$projectPath\\cache\\${songResult.getString("id")}.jpg")
         val songImage: Image =
             if (!songImageFile.exists())
                 (downloadImage("https://www.diving-fish.com/covers/${songResult.getString("id")}.jpg", songImageFile)
@@ -187,7 +185,7 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
             }
         }
 
-        var chartResult = JSONObject()
+        var chartResult: JSONObject
         try{
             chartResult=songArray.getJSONObject((0 until songArray.length()).random())
         }
@@ -206,7 +204,7 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
                 dxs2LevelTransform(songResult.getJSONArray("ds").getFloat(difficulty)) +
                 " (${songResult.getJSONArray("ds").getFloat(difficulty)})\n"
 
-        val songImageFile: File = File("$projectPath\\cache\\${songResult.getString("id")}.jpg")
+        val songImageFile = File("$projectPath\\cache\\${songResult.getString("id")}.jpg")
         val songImage: Image =
             if (!songImageFile.exists())
                 (downloadImage("https://www.diving-fish.com/covers/${songResult.getString("id")}.jpg", songImageFile)
