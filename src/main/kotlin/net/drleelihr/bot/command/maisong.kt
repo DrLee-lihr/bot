@@ -13,6 +13,7 @@ import org.w3c.dom.ranges.Range
 import java.io.File
 import java.time.Instant
 import kotlin.math.floor
+import kotlin.time.measureTimedValue
 
 val difficultyLevelTransform= { a: Int ->
     when (a) {
@@ -36,9 +37,10 @@ val difficultyFullLevelTransform= { a: Int ->
 }
 val dxs2LevelTransform: (Float) -> String = { "${floor(it).toInt()}${if(it-floor(it)>=0.65)"+" else ""}" }
 infix fun Float.inLevel(s:String) : Boolean  {
-    val baseLevel:Int=s.split("+","+")[0].toInt()
-    return if(s.contains("+")||s.contains("+")) (this>=baseLevel+0.65&&this<=baseLevel+0.95)
-            else (this>=baseLevel-0.05&&this<=baseLevel+0.65)
+    val baseLevel:Int=s.split("+","＋")[0].toInt()
+    return if(baseLevel<=6&&(s.contains("+")||s.contains("＋"))) false
+    else if(s.contains("+")||s.contains("＋")) (this>=baseLevel+0.65&&this<=baseLevel+0.95)
+    else (this>=baseLevel-0.05&&this<=baseLevel+0.65)
 }
 val difficultyIDTransform= { a: String ->
     when (a.lowercase()) {

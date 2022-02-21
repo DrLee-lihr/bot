@@ -24,10 +24,7 @@ fun String.r()=this.reversed()
  *     例：随个t+p的@dp写的白14+
  */
 suspend fun maisongRandom(event: GroupMessageEvent, regexList:MutableList<String>){
-    try{ random(event,regexList[0]) }
-    catch (e:NoSuchElementException){
-        send(event, "错误：没有满足条件的曲目。")
-    }
+    random(event,regexList[0])
 }
 
 private suspend fun random(event: GroupMessageEvent, command:String) {
@@ -38,7 +35,7 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
     var arguments = command.substring(2).reversed()
     var level: String = ""
     try {
-        while (arguments[0] in listOf<Char>('1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', '+', '+', '歌')) {
+        while (arguments[0] in listOf<Char>('1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', '+', '＋', '歌')) {
             level += arguments[0]
             arguments = arguments.drop(1)
         }
@@ -118,7 +115,14 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
                 }
             }
         }
-        val songResult = songArray.getJSONObject((0 until songArray.length()).random())
+        var songResult=JSONObject()
+        try {
+            songResult = songArray.getJSONObject((0 until songArray.length()).random())
+        }
+        catch (e:NoSuchElementException){
+            send(event, "错误：没有满足条件的曲目。"+if(level in listOf<String>("5+","6+","5＋","6＋"))
+                "\n提示：一部分5级和6级曲目虽然小数位大于等于7，但仍标为5级和6级；5+和6+难度不存在；最低的带+的难度是7+。" else "")
+        }
         val resultHead1 = "从${songArray.length()}个满足条件的结果中随机："
         val resultHead = "${songResult.getString("id")}.${songResult.getString("title")}" +
                 "(${songResult.getString("type")})\n"
@@ -182,7 +186,15 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
             }
         }
 
-        val chartResult = songArray.getJSONObject((0 until songArray.length()).random())
+        var chartResult = JSONObject()
+        try{
+            chartResult=songArray.getJSONObject((0 until songArray.length()).random())
+        }
+        catch (e:NoSuchElementException){
+            send(event, "错误：没有满足条件的曲目。"+if(level in listOf<String>("5+","6+","5＋","6＋"))
+                "\n提示：一部分5级和6级曲目虽然小数位大于等于7，但仍标为5级和6级；5+和6+难度不存在；最低的带+的难度是7+。" else "")
+        }
+
         val difficulty: Int = chartResult.getInt("difficulty")
         val songResult = chartResult.getJSONObject("song")
         val resultHead1 = "从${songArray.length()}个满足条件的结果中随机："
