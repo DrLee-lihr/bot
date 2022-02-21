@@ -118,8 +118,10 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
             songResult = songArray.getJSONObject((0 until songArray.length()).random())
         }
         catch (e:NoSuchElementException){
-            send(event, "错误：没有满足条件的曲目。"+if(level in listOf("5+","6+","5＋","6＋"))
-                "\n提示：一部分5级和6级曲目虽然小数位大于等于7，但仍标为5级和6级；5+和6+难度不存在；最低的带+的难度是7+。" else "")
+            send(event, "错误：没有满足条件的曲目。"+if(level in listOf("1+","1＋","2+","2＋","3+","3＋",
+                    "4+","4＋","5+","5＋","6+","6＋",))
+                "\n提示：一部分5级和6级曲目虽然定数小数位大于等于7，但仍标为5级和6级；" +
+                        "1-4级则不存在定数小数位大于等于7的谱面；1+至6+这六个难度不存在；最低的带+的难度是7+。" else "")
             return
         }
         val resultHead1 = "从${songArray.length()}个满足条件的结果中随机："
@@ -190,8 +192,10 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
             chartResult=songArray.getJSONObject((0 until songArray.length()).random())
         }
         catch (e:NoSuchElementException){
-            send(event, "错误：没有满足条件的曲目。"+if(level in listOf<String>("5+","6+","5＋","6＋"))
-                "\n提示：一部分5级和6级曲目虽然小数位大于等于7，但仍标为5级和6级；5+和6+难度不存在；最低的带+的难度是7+。" else "")
+            send(event, "错误：没有满足条件的曲目。"+if(level in listOf("1+","1＋","2+","2＋","3+","3＋",
+                    "4+","4＋","5+","5＋","6+","6＋",))
+                "\n提示：一部分5级和6级曲目虽然定数小数位大于等于7，但仍标为5级和6级；" +
+                        "1-4级则不存在定数小数位大于等于7的谱面；1+至6+这六个难度不存在；最低的带+的难度是7+。" else "")
             return
         }
 
