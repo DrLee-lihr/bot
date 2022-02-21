@@ -39,7 +39,7 @@ var commandList = mutableMapOf(
 )
 
 suspend fun commandCheck(event:GroupMessageEvent){
-    //try{
+    try{
         for(regex in regexCommandList.keys){
             if(regex.find(event.message.content)!=null) {
                 regexCommandList[regex]?.let {
@@ -59,10 +59,10 @@ suspend fun commandCheck(event:GroupMessageEvent){
                 commandList[commandName]?.let { it(event,commandContent) }
             }
         }
-    //}
-    /*catch(e:Exception){
+    }
+    catch(e:Exception){
         reply(event,"指令在执行过程中出错：\n${e.localizedMessage}")
-    }*/
+    }
 }
 
 suspend fun main() {

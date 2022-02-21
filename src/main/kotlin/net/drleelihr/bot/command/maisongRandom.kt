@@ -24,7 +24,10 @@ fun String.r()=this.reversed()
  *     例：随个t+p的@dp写的白14+
  */
 suspend fun maisongRandom(event: GroupMessageEvent, regexList:MutableList<String>){
-    random(event,regexList[0])
+    try{ random(event,regexList[0]) }
+    catch (e:NoSuchElementException){
+        send(event, "错误：没有满足条件的曲目。")
+    }
 }
 
 private suspend fun random(event: GroupMessageEvent, command:String) {
