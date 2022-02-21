@@ -9,46 +9,51 @@ import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.MessageChainBuilder
 import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import org.json.JSONArray
+import org.w3c.dom.ranges.Range
 import java.io.File
 import java.time.Instant
 import kotlin.math.floor
 
+val difficultyLevelTransform= { a: Int ->
+    when (a) {
+        0 -> "BSC"
+        1 -> "ADV"
+        2 -> "EXP"
+        3 -> "MST"
+        4 -> "ReM"
+        else -> "Original"
+    }
+}
+val difficultyFullLevelTransform= { a: Int ->
+    when (a) {
+        0 -> "Basic"
+        1 -> "Advanced"
+        2 -> "Expert"
+        3 -> "Master"
+        4 -> "Re:Master"
+        else -> "Original"
+    }
+}
+val dxs2LevelTransform: (Float) -> String = { "${floor(it).toInt()}${if(it-floor(it)>=0.65)"+" else ""}" }
+infix fun Float.inLevel(s:String) : Boolean  {
+    val baseLevel:Int=s.split("+","+")[0].toInt()
+    return if(s.contains("+")||s.contains("+")) (this>=baseLevel+0.7&&this<=baseLevel+0.9)
+            else (this>=baseLevel&&this<=baseLevel+0.6)
+}
+val difficultyIDTransform= { a: String ->
+    when (a.lowercase()) {
+        "绿","bsc","basic","bas" -> 0
+        "黄","adv","advanced" -> 1
+        "红","exp","expert" -> 2
+        "紫","mst","master","mas" -> 3
+        "白","rem","re:master","remaster" -> 4
+        else -> -1
+    }
+}
+
+
 
 suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
-
-
-    val difficultyLevelTransform= { a: Int ->
-        when (a) {
-            0 -> "BSC"
-            1 -> "ADV"
-            2 -> "EXP"
-            3 -> "MST"
-            4 -> "ReM"
-            else -> "Original"
-        }
-    }
-    val difficultyFullLevelTransform= { a: Int ->
-        when (a) {
-            0 -> "Basic"
-            1 -> "Advanced"
-            2 -> "Expert"
-            3 -> "Master"
-            4 -> "Re:Master"
-            else -> "Original"
-        }
-    }
-    val dxs2LevelTransform: (Float) -> String = { "${floor(it).toInt()}${if(it-floor(it)>=0.65)"+" else ""}" }
-    val difficultyIDTransform= { a: String ->
-        when (a.lowercase()) {
-            "绿","bsc","basic","bas" -> 0
-            "黄","adv","advanced" -> 1
-            "红","exp","expert" -> 2
-            "紫","mst","master","mas" -> 3
-            "白","rem","re:master","remaster" -> 4
-            else -> -1
-        }
-    }
-
 
     var timeStampRun:File=File("$projectPath\\cache\\RunTime.txt")
     var lastRunTime= timeStampRun.readText().toLong()

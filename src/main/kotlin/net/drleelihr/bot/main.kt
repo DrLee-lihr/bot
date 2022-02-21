@@ -6,6 +6,7 @@ package net.drleelihr.bot
 
 
 import net.drleelihr.bot.command.maisong
+import net.drleelihr.bot.command.maisongRandom
 import net.drleelihr.bot.command.regexWiki
 import net.drleelihr.bot.command.wiki
 import net.mamoe.mirai.Bot
@@ -28,6 +29,7 @@ val projectPath: Path = Path("D:\\Dev\\bot")
 
 var regexCommandList = mutableMapOf(
     Regex("\\[\\[.*?]]") to ::regexWiki,
+    Regex("随个.*") to ::maisongRandom
 )
 
 var commandList = mutableMapOf(
@@ -37,25 +39,30 @@ var commandList = mutableMapOf(
 )
 
 suspend fun commandCheck(event:GroupMessageEvent){
-    for(regex in regexCommandList.keys){
-        if(regex.find(event.message.content)!=null) {
-            regexCommandList[regex]?.let {
-                var b: MutableList<String> = emptyList<String>().toMutableList()
-                for (c in regex.findAll(event.message.content).toMutableList()) {
-                    b.add(0, c.value)
+    //try{
+        for(regex in regexCommandList.keys){
+            if(regex.find(event.message.content)!=null) {
+                regexCommandList[regex]?.let {
+                    var b: MutableList<String> = emptyList<String>().toMutableList()
+                    for (c in regex.findAll(event.message.content).toMutableList()) {
+                        b.add(0, c.value)
+                    }
+                    it(event, b)
                 }
-                it(event, b)
             }
         }
-    }
-    if(event.message.content.startsWith("!")||event.message.content.startsWith("！")) {
-        val commandContent=event.message.content.substring(1).split(" ").toMutableList()
-        if (commandContent[0] in commandList.keys) {
-            val commandName=commandContent[0]
-            commandContent.removeAt(0)
-            commandList[commandName]?.let { it(event,commandContent) }
+        if(event.message.content.startsWith("!")||event.message.content.startsWith("！")) {
+            val commandContent=event.message.content.substring(1).split(" ").toMutableList()
+            if (commandContent[0] in commandList.keys) {
+                val commandName=commandContent[0]
+                commandContent.removeAt(0)
+                commandList[commandName]?.let { it(event,commandContent) }
+            }
         }
-    }
+    //}
+    /*catch(e:Exception){
+        reply(event,"指令在执行过程中出错：\n${e.localizedMessage}")
+    }*/
 }
 
 suspend fun main() {
