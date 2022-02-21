@@ -31,7 +31,6 @@ suspend fun maisongRandom(event: GroupMessageEvent, regexList:MutableList<String
 }
 
 private suspend fun random(event: GroupMessageEvent, command:String) {
-    println(13.8F inLevel "13+")
     println("成功进入查询函数")
     var songDataCache: File = File("$projectPath\\cache\\songDataCache.json")
     val songData = JSONArray(songDataCache.readText())
@@ -140,7 +139,8 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
             .append(resultDifficulty)
             .build()
         send(event, messageChain)
-    } else {
+    }
+    else {
         if (level.contains('.')) {
             val levelNum: Float = level.toFloat()
             for (i in 0 until songData.length()) {

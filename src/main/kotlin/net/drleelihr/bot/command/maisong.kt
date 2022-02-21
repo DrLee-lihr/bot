@@ -37,8 +37,8 @@ val difficultyFullLevelTransform= { a: Int ->
 val dxs2LevelTransform: (Float) -> String = { "${floor(it).toInt()}${if(it-floor(it)>=0.65)"+" else ""}" }
 infix fun Float.inLevel(s:String) : Boolean  {
     val baseLevel:Int=s.split("+","+")[0].toInt()
-    return if(s.contains("+")||s.contains("+")) (this>=baseLevel+0.7&&this<=baseLevel+0.9)
-            else (this>=baseLevel&&this<=baseLevel+0.6)
+    return if(s.contains("+")||s.contains("+")) (this>=baseLevel+0.65&&this<=baseLevel+0.95)
+            else (this>=baseLevel-0.05&&this<=baseLevel+0.65)
 }
 val difficultyIDTransform= { a: String ->
     when (a.lowercase()) {
