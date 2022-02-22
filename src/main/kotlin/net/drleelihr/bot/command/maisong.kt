@@ -1,9 +1,6 @@
 package net.drleelihr.bot.command
 
-import net.drleelihr.bot.downloadImage
-import net.drleelihr.bot.httpRequest
-import net.drleelihr.bot.projectPath
-import net.drleelihr.bot.send
+import net.drleelihr.bot.*
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.MessageChainBuilder
@@ -85,7 +82,7 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
                     }
                     catch(e:Exception){ continue }
             }
-            send(event,result,"定数为${commandContent[1]}")
+            sendMessageOrForward(event,result,"定数为${commandContent[1]}")
         }
 
         "search" -> {
@@ -109,7 +106,7 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
                     break
                 }
             }
-            send(event,result,"有关“${commandContent[1]}”")
+            sendMessageOrForward(event,result,"有关“${commandContent[1]}”")
         }
 
         "bpm" -> {
@@ -138,7 +135,7 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
                     }
                 }
             }
-            send(event,result,if(commandContent[1]==commandContent[2])"BPM为${commandContent[1]}"
+            sendMessageOrForward(event,result,if(commandContent[1]==commandContent[2])"BPM为${commandContent[1]}"
                                 else "BPM介于${commandContent[1]}和${commandContent[2]}")
         }
 
@@ -163,7 +160,7 @@ suspend fun maisong(event:GroupMessageEvent,commandContent:MutableList<String>){
                     catch(e:Exception){ continue }
                 }
             }
-            send(event,result,"谱师为${commandContent[1]}")
+            sendMessageOrForward(event,result,"谱师为${commandContent[1]}")
         }
 
         else -> {

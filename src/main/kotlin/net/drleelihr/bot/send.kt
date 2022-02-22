@@ -1,6 +1,8 @@
 package net.drleelihr.bot
 
+import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.event.events.GroupMessageEvent
+import net.mamoe.mirai.message.MessageReceipt
 import net.mamoe.mirai.message.data.*
 
 const val contentLengthLimit:Int=250
@@ -14,8 +16,7 @@ class SongListDisplayStrategy(private val title: String) : ForwardMessage.Displa
 
 }
 
-
-suspend fun send(event:GroupMessageEvent,content:String,title:String="您请求"){
+suspend fun sendMessageOrForward(event: GroupMessageEvent,content: String,title: String="您请求"): MessageReceipt<Group> {
     if(content.length>=contentLengthLimit){
         val singleContent=content.split("\n")
         val bigContents= mutableListOf<String>()
@@ -28,16 +29,20 @@ suspend fun send(event:GroupMessageEvent,content:String,title:String="您请求"
             }
         }
         if(singleContent.size%10!=0)bigContents.add(bigContent)
-        event.group.sendMessage(buildForwardMessage(event.group,SongListDisplayStrategy(title)) {
+        return event.group.sendMessage(buildForwardMessage(event.group,SongListDisplayStrategy(title)) {
             for(singleBigContentIndex in bigContents.indices)add(event.bot, buildMessageChain {
                 +(bigContents[singleBigContentIndex] +
                         "共${singleContent.size/10+(if(singleContent.size%10==0)0 else 1)}页，第${singleBigContentIndex+1}页")
             })
         })
     }
-    else event.group.sendMessage(content)
+    else return event.group.sendMessage(content)
 }
 
-suspend fun send(event:GroupMessageEvent,content:MessageChain){
-    event.group.sendMessage(content)
+suspend fun send(event:GroupMessageEvent,content:String): MessageReceipt<Group> {
+    return event.group.sendMessage(content)
+}
+
+suspend fun send(event:GroupMessageEvent,content:MessageChain): MessageReceipt<Group> {
+    return event.group.sendMessage(content)
 }

@@ -19,7 +19,12 @@ fun String.r()=this.reversed()
  * maisongRandom
  *
  * 语法：随个【（某某曲师）的】【（某某谱师）写的】【难度名称（红紫白等等）]】<定数/难度级别>
- *     例：随个t+p的@dp写的白14+
+ *
+ * 例：随个t+p的@dp写的紫14+
+ *
+ * 例2：随个owl*tree的歌
+ *
+ * 例3：随个红13.5
  */
 suspend fun maisongRandom(event: GroupMessageEvent, regexList:MutableList<String>){
     random(event,regexList[0])
