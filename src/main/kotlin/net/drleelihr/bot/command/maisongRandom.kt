@@ -2,6 +2,7 @@ package net.drleelihr.bot.command
 
 import net.drleelihr.bot.downloadImage
 import net.drleelihr.bot.projectPath
+import net.drleelihr.bot.reply
 import net.drleelihr.bot.send
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.Image
@@ -35,15 +36,42 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
     val songDataCache = File("$projectPath\\cache\\songDataCache.json")
     val songData = JSONArray(songDataCache.readText())
     println("歌曲数据加载完成")
+
+
+
     var arguments = command.substring(2).reversed()
+
+    var version:String=
+    if("XD" containedBy arguments){
+        var x=""
+        arguments.split("XD").forEach{ a -> x+=a }
+        arguments=x
+        "DX"
+    }
+    else if("DS" containedBy arguments||"准标" containedBy arguments){
+        if("DS" containedBy arguments){
+            var x=""
+            arguments.split("DS").forEach{ a -> x+=a }
+            arguments=x
+        }
+        else{
+            var x=""
+            arguments.split("准标").forEach{ a -> x+=a }
+            arguments=x
+        }
+        "SD"
+    }
+    else ""
+
+    println("歌曲版本判断完成：$version")
+
     var level = ""
     try {
         while (arguments[0] in listOf('1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', '+', '＋', '歌')) {
             level += arguments[0]
             arguments = arguments.drop(1)
         }
-    } catch (_: Exception) {
-    }
+    } catch (_: Exception) {}
     level = level.reversed()
     if (level == "歌") level = ""
     println("歌曲定数分析完成:$level")
@@ -81,7 +109,7 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
         "谱师:$charter\n" +
                 "曲师:$artist"
     )
-
+    println("剩余参数：$arguments")
 
     var songArray = JSONArray()
     //songArray.put(songData.getJSONObject(359))
@@ -95,6 +123,11 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
                         && artist containedBy song.getJSONObject("basic_info").getString("artist")
                         && charter containedBy song.getJSONArray("charts").getJSONObject(difficulty)
                             .getString("charter")
+                        && when(version){
+                            "DX"->(song.getString("id").length==5)
+                            "SD"->(song.getString("id").length==3)
+                            else-> true
+                        }
                     ) {
                         songArray.put(song)
                     }
@@ -110,6 +143,11 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
                         && artist containedBy song.getJSONObject("basic_info").getString("artist")
                         && charter containedBy song.getJSONArray("charts").getJSONObject(difficulty)
                             .getString("charter")
+                        && when(version){
+                            "DX"->(song.getString("id").length==5)
+                            "SD"->(song.getString("id").length==3)
+                            else-> true
+                        }
                     ) {
                         songArray.put(song)
                     }
@@ -161,6 +199,11 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
                             && artist containedBy song.getJSONObject("basic_info").getString("artist")
                             && charter containedBy song.getJSONArray("charts").getJSONObject(difficulty)
                                 .getString("charter")
+                            && when(version){
+                                "DX"->(song.getString("id").length==5)
+                                "SD"->(song.getString("id").length==3)
+                                else-> true
+                            }
                         ) {
                             val jsonObj: JSONObject =
                                 JSONObject("{\"difficulty\":$difficulty,\"song\":${song.toString()}}")
@@ -180,6 +223,11 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
                             && artist containedBy song.getJSONObject("basic_info").getString("artist")
                             && charter containedBy song.getJSONArray("charts").getJSONObject(difficulty)
                                 .getString("charter")
+                            && when(version){
+                                "DX"->(song.getString("id").length==5)
+                                "SD"->(song.getString("id").length==3)
+                                else-> true
+                            }
                         ) {
                             val jsonObj: JSONObject =
                                 JSONObject("{\"difficulty\":$difficulty,\"song\":${song.toString()}}")
