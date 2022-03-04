@@ -1,4 +1,4 @@
-package net.drleelihr.bot
+package net.drleelihr.bot.lib
 
 import java.io.File
 import java.net.URL

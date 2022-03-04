@@ -1,9 +1,9 @@
-package net.drleelihr.bot
+package net.drleelihr.bot.lib
 
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
-suspend fun httpRequest(host:String): String? {
+fun httpRequest(host:String): String? {
     val client= OkHttpClient()
     val request= Request.Builder()
         .url(host)

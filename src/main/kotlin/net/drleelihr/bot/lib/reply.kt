@@ -1,4 +1,4 @@
-package net.drleelihr.bot
+package net.drleelihr.bot.lib
 
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.event.events.GroupMessageEvent

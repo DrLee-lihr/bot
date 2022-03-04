@@ -5,25 +5,17 @@
 package net.drleelihr.bot
 
 
-import net.drleelihr.bot.command.maisong
-import net.drleelihr.bot.command.maisongRandom
-import net.drleelihr.bot.command.regexWiki
-import net.drleelihr.bot.command.wiki
-import net.mamoe.mirai.Bot
+import net.drleelihr.bot.command.*
+import net.drleelihr.bot.lib.reply
 import net.mamoe.mirai.BotFactory
 import net.mamoe.mirai.alsoLogin
 import net.mamoe.mirai.event.events.GroupMessageEvent
-import net.mamoe.mirai.message.code.MiraiCode
-import net.mamoe.mirai.message.code.MiraiCode.deserializeMiraiCode
-import net.mamoe.mirai.message.data.Image
-import net.mamoe.mirai.message.data.MessageSource.Key.recall
-import net.mamoe.mirai.message.data.buildForwardMessage
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.utils.BotConfiguration
-import java.io.File
 import java.nio.file.Path
-import java.time.Instant
 import kotlin.io.path.Path
+
+var enableCatchException=true
 
 val projectPath: Path = Path("D:\\Dev\\bot")
 
@@ -34,8 +26,8 @@ var regexCommandList = mutableMapOf(
 
 var commandList = mutableMapOf(
     "wiki" to ::wiki,
-    "maisong" to ::maisong,
-    "m" to ::maisong,
+    "maisong" to ::maiInfo,
+    "m" to ::maiInfo,
 )
 
 suspend fun commandCheck(event:GroupMessageEvent){
@@ -61,7 +53,8 @@ suspend fun commandCheck(event:GroupMessageEvent){
         }
     }
     catch(e:Exception){
-        reply(event,"指令在执行过程中出错：\n${e.localizedMessage}")
+        if(enableCatchException) reply(event,"指令在执行过程中出错：\n${e.stackTrace}")
+        else throw e
     }
 }
 

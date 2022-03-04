@@ -1,8 +1,8 @@
 package net.drleelihr.bot.command
 
 
-import net.drleelihr.bot.httpRequest
-import net.drleelihr.bot.reply
+import net.drleelihr.bot.lib.httpRequest
+import net.drleelihr.bot.lib.reply
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.event.nextEvent
 import net.mamoe.mirai.message.data.content
@@ -58,10 +58,12 @@ suspend fun wiki(event: GroupMessageEvent, commandContent:MutableList<String>){
     }
     try{
         val searchJson=
-            JSONArray(httpRequest("${requestSite}api.php?action=opensearch&format=json&namespace=*&limit=10&redirects=resolve&search="+
-                    if(pageName.contains(":"))pageName else ":$pageName"))
+            JSONArray(
+                httpRequest("${requestSite}api.php?action=opensearch&format=json&namespace=*&limit=10&redirects=resolve&search="+
+                    if(pageName.contains(":"))pageName else ":$pageName")
+            )
 
-        val message=reply(event,"未找到页面，您要找的是不是[${searchJson.getJSONArray(1).getString(0)}]？\n"+
+        val message= reply(event,"未找到页面，您要找的是不是[${searchJson.getJSONArray(1).getString(0)}]？\n"+
                 "（请发送y或其他表示确认的词语来确认）")
         val event = nextEvent<GroupMessageEvent>(100000) { it.group==event.group&&it.sender==event.sender }
 

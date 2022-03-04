@@ -1,4 +1,4 @@
-package net.drleelihr.bot
+package net.drleelihr.bot.lib
 
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.event.events.GroupMessageEvent
@@ -10,15 +10,16 @@ const val contentLengthLimit:Int=250
 
 class SongListDisplayStrategy(private val title: String) : ForwardMessage.DisplayStrategy {
 
-    override fun generateTitle(forward: RawForwardMessage): String = "${title}的曲目（谱面）"
+    override fun generateTitle(forward: RawForwardMessage): String = title
 
-    override fun generateBrief(forward: RawForwardMessage): String = "[曲目列表]"
+    override fun generateBrief(forward: RawForwardMessage): String = "[消息列表]"
 
 }
 
-suspend fun sendMessageOrForward(event: GroupMessageEvent,content: String,title: String="您请求"): MessageReceipt<Group> {
+suspend fun sendMessageOrForward(event: GroupMessageEvent,content: String,title: String="您请求的内容"): MessageReceipt<Group> {
     if(content.length>=contentLengthLimit){
-        val singleContent=content.split("\n")
+        var singleContent=content.split("\n").toMutableList()
+        singleContent.remove("")
         val bigContents= mutableListOf<String>()
         var bigContent=""
         for(i in singleContent.indices) {
