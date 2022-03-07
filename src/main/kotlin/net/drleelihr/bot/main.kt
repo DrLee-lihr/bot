@@ -15,13 +15,14 @@ import net.mamoe.mirai.utils.BotConfiguration
 import java.nio.file.Path
 import kotlin.io.path.Path
 
-var enableCatchException=true
+var enableCatchException=false
 
 val projectPath: Path = Path("D:\\Dev\\bot")
 
 var regexCommandList = mutableMapOf(
     Regex("\\[\\[.*?]]") to ::regexWiki,
-    Regex("随个.*") to ::maisongRandom
+    Regex("随个.*") to ::maiSongRandom,
+    Regex(".*是什么歌") to ::maiSongAlias
 )
 
 var commandList = mutableMapOf(
@@ -53,7 +54,7 @@ suspend fun commandCheck(event:GroupMessageEvent){
         }
     }
     catch(e:Exception){
-        if(enableCatchException) reply(event,"指令在执行过程中出错：\n${e.stackTrace}")
+        if(enableCatchException) reply(event,"指令在执行过程中出错：\n${e.message}")
         else throw e
     }
 }

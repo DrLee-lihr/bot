@@ -1,20 +1,16 @@
 package net.drleelihr.bot.command
 
 import net.drleelihr.bot.lib.*
-import net.drleelihr.bot.projectPath
 import net.mamoe.mirai.event.events.GroupMessageEvent
-import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.MessageChainBuilder
 import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
-import org.json.JSONObject
-import java.io.File
 
 infix fun String.containedBy(father:String):Boolean = father.lowercase().contains(this.lowercase())
 fun String.r()=this.reversed()
 
 
 /**
- * maisongRandom
+ * maiSongRandom
  *
  * 语法：随个【（某某曲师）的】【（某某谱师）写的】【难度名称（红紫白等等）]】<定数/难度级别>
  *
@@ -24,7 +20,7 @@ fun String.r()=this.reversed()
  *
  * 例3：随个红13.5
  */
-suspend fun maisongRandom(event: GroupMessageEvent, regexList:MutableList<String>){
+suspend fun maiSongRandom(event: GroupMessageEvent, regexList:MutableList<String>){
     random(event,regexList[0])
 }
 
@@ -145,7 +141,7 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
     val messageChain = MessageChainBuilder()
         .append("从${chartResultList.size}个满足条件的结果中随机：\n")
         .append(result.song.songInfoSummary.endl())
-        .append(result.song.getImageFile().uploadAsImage(event.group))
+        .append(result.song.getImageFileAsMessage(event))
         .append(result.chartBaseSummary)
         .build()
     send(event, messageChain)

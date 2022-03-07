@@ -113,7 +113,7 @@ suspend fun maiInfo(event:GroupMessageEvent,commandContent:MutableList<String>){
             commandContent.add(commandContent.size,"")
             val difficultyID=difficultyIDTransform(commandContent[1])
             val song=songList.id(commandContent[0].toInt())
-            val songImage=song.getImageFile().uploadAsImage(event.group)
+            val songImage=song.getImageFileAsMessage(event)
 
             var msgChain:MessageChain=
                 if(difficultyID==-1){
@@ -136,6 +136,7 @@ suspend fun maiInfo(event:GroupMessageEvent,commandContent:MutableList<String>){
                         .append(songImage)
                         .append(song.charts[difficultyID].chartBaseSummary.endl())
                         .append(song.charts[difficultyID].chartNotesInfo.endl())
+                        .append(song.charts[difficultyID].getProbeData().chartProbeSummary.endl())
                         .build()
                 }
             send(event,msgChain)
