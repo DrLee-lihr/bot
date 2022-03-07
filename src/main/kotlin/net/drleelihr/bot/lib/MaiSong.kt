@@ -1,8 +1,14 @@
 package net.drleelihr.bot.lib
 
 import net.drleelihr.bot.projectPath
+import net.mamoe.mirai.event.events.MessageEvent
+import net.mamoe.mirai.message.data.Image
+import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import org.json.JSONObject
 import java.io.File
+import java.math.BigDecimal
+import java.math.RoundingMode
+import kotlin.math.roundToInt
 
 class MaiSong(json:JSONObject) {
 
@@ -17,6 +23,15 @@ class MaiSong(json:JSONObject) {
         var ds:Float=0.0F   //谱面定数
         var cid:Int=0       //谱面id
         var charter:String
+
+        var playerCount:Int=0
+        var average:Double=0.0
+        lateinit var tag:String
+        var difficultyRankInSameLevel:Int=0
+        var songCountInSameLevel:Int=0
+        var sssCount:Int=0
+        var chartProbeSummary=""
+
         init{
             difficulty=json.getInt("difficulty")
             cid=json.getInt("cid")
@@ -32,6 +47,25 @@ class MaiSong(json:JSONObject) {
             }
             else Break= notes[3] as Int
         }
+
+        fun getProbeData(): Chart {
+            val data=JSONObject(httpRequest("https://maimai.ohara-rinne.tech/api/chart/${song.id}/${difficulty}"))
+                .getJSONObject("data")
+            playerCount=data.getInt("playerCount")
+            average=data.getDouble("average")
+            tag=data.getString("tag")
+            difficultyRankInSameLevel=data.getInt("difficultyRankInSameLevel")
+            songCountInSameLevel=data.getInt("songCountInSameLevel")
+            sssCount=data.getInt("ssscount")
+            chartProbeSummary="""
+                tag:$tag
+                共有${playerCount}名玩家游玩了该谱面，平均达成率：${average}
+                其中${sssCount}人（${((sssCount.toDouble() / playerCount.toDouble())*10000).toInt().toDouble()/100}%）达成SSS
+                SSS人数在同级别曲目中排名：（${difficultyRankInSameLevel+1}/${songCountInSameLevel}）
+            """.trimIndent()
+            return this
+        }
+
         var chartNotesInfo="""
                         TAP: $tap
                         HOLD: $hold
@@ -45,20 +79,20 @@ class MaiSong(json:JSONObject) {
     }
 
     var id: Int=589
-    lateinit var title:String
-    lateinit var basicInfo:JSONObject
+    var title:String
+    var basicInfo:JSONObject
     var charts:MutableList<Chart> = mutableListOf()
-    lateinit var artist:String
-    lateinit var genre:String
+    var artist:String
+    var genre:String
     var hasReM:Boolean=false
     var bpm:Int=0
-    lateinit var version:String
+    var version:String
     var isNew:Boolean=false
     var type:Int=0
     var ds:MutableList<Float> = mutableListOf()
-    lateinit var typeStr:String
+    var typeStr:String
 
-    private fun parseJSON(json:JSONObject){
+    init {
         id=json.getString("id").toInt()
         title=json.getString("title")
         typeStr=json.getString("type")
@@ -79,21 +113,22 @@ class MaiSong(json:JSONObject) {
                 .put("difficulty",i)
             ))
         }
+    }
 
-    }
-    init {
-        parseJSON(json)
-    }
     var songInfoSummary="${id}.${title}(${typeStr})"
 
     var songDifficultSummary="${ds[0]}/${ds[1]}/${ds[2]}/${ds[3]}${
-        try{ds[5]}catch(_:Exception){""}
+        try{"/${ds[4]}"}catch(_:Exception){""}
     }"
 
     fun getImageFile(): File {
-        val songImageFile = File("$projectPath\\cache\\${id}.jpg")
+        val songImageFile = File("$projectPath\\cache\\pictures\\${id}.jpg")
         return if (!songImageFile.exists())
             downloadImage("https://www.diving-fish.com/covers/${id}.jpg", songImageFile)
         else songImageFile
+    }
+
+    suspend fun getImageFileAsMessage(event:MessageEvent): Image {
+        return  getImageFile().uploadAsImage(event.subject)
     }
 }
