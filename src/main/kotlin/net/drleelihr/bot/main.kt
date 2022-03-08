@@ -18,11 +18,16 @@ import kotlin.io.path.Path
 var enableCatchException=false
 
 val projectPath: Path = Path("D:\\Dev\\bot")
+const val resourcePath="D:\\Dev\\bot\\src\\main\\resources"
 
 var regexCommandList = mutableMapOf(
     Regex("\\[\\[.*?]]") to ::regexWiki,
+)
+
+var fullRegexCommandList = mutableMapOf(
     Regex("随个.*") to ::maiSongRandom,
-    Regex(".*是什么歌") to ::maiSongAlias
+    Regex(".*是什么歌") to ::maiSongAlias,
+    Regex("b40.*") to ::b40
 )
 
 var commandList = mutableMapOf(
@@ -36,12 +41,17 @@ suspend fun commandCheck(event:GroupMessageEvent){
         for(regex in regexCommandList.keys){
             if(regex.find(event.message.content)!=null) {
                 regexCommandList[regex]?.let {
-                    var b: MutableList<String> = emptyList<String>().toMutableList()
+                    var b: MutableList<String> = mutableListOf()
                     for (c in regex.findAll(event.message.content).toMutableList()) {
-                        b.add(0, c.value)
+                        b.add(c.value)
                     }
                     it(event, b)
                 }
+            }
+        }
+        for(regex in fullRegexCommandList.keys){
+            if(regex.matches(event.message.content)){
+                fullRegexCommandList[regex]!!(event,event.message.content)
             }
         }
         if(event.message.content.startsWith("!")||event.message.content.startsWith("！")) {

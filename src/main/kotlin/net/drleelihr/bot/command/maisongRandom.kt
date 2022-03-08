@@ -1,9 +1,12 @@
 package net.drleelihr.bot.command
 
 import net.drleelihr.bot.lib.*
+import net.drleelihr.bot.lib.maimai.MaiSong
+import net.drleelihr.bot.lib.maimai.MaiSongList
+import net.drleelihr.bot.lib.maimai.difficultyIDTransform
+import net.drleelihr.bot.lib.maimai.inLevel
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.MessageChainBuilder
-import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 
 infix fun String.containedBy(father:String):Boolean = father.lowercase().contains(this.lowercase())
 fun String.r()=this.reversed()
@@ -20,18 +23,14 @@ fun String.r()=this.reversed()
  *
  * 例3：随个红13.5
  */
-suspend fun maiSongRandom(event: GroupMessageEvent, regexList:MutableList<String>){
-    random(event,regexList[0])
-}
-
-private suspend fun random(event: GroupMessageEvent, command:String) {
+suspend fun maiSongRandom(event: GroupMessageEvent, content: String){
     println("成功进入查询函数")
-    val songList=MaiSongList()
+    val songList= MaiSongList()
     val totalSongNum=songList.totalSongNum
     println("歌曲数据加载完成")
 
 
-    var arguments = command.substring(2).reversed()
+    var arguments = content.substring(2).reversed()
 
     val type:Int=
         when {
@@ -116,25 +115,25 @@ private suspend fun random(event: GroupMessageEvent, command:String) {
             && charter containedBy chart.charter
             && (if (type != -1) type == chart.song.type else true)
             && when {
-                    level == "" -> true
-                    level.contains(".") -> chart.ds == level.toFloat()
-                    else -> chart.ds inLevel level
-                }
+                level == "" -> true
+                level.contains(".") -> chart.ds == level.toFloat()
+                else -> chart.ds inLevel level
+            }
             && (if(difficulty != null)difficulty == chart.difficulty else true)
         ) {
             chartResultList.add(chart)
         }
     }
 
-    var result:MaiSong.Chart
+    var result: MaiSong.Chart
     try {
         result=chartResultList.random()
     }
     catch (e:NoSuchElementException){
         send(event, "错误：没有满足条件的曲目。"
                 + if(level in listOf("1+","1＋","2+","2＋","3+","3＋",
-                    "4+","4＋","5+","5＋","6+","6＋",))
-                    "\n提示：一部分5级和6级曲目虽然定数小数位大于等于7，但仍标为5级和6级；" +
+                "4+","4＋","5+","5＋","6+","6＋",))
+            "\n提示：一部分5级和6级曲目虽然定数小数位大于等于7，但仍标为5级和6级；" +
                     "1-4级则不存在定数小数位大于等于7的谱面；1+至6+这六个难度不存在；最低的带+的难度是7+。" else "")
         return
     }

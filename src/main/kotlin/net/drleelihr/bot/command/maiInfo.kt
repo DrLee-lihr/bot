@@ -1,13 +1,11 @@
 package net.drleelihr.bot.command
 
-import net.drleelihr.bot.*
 import net.drleelihr.bot.lib.*
+import net.drleelihr.bot.lib.maimai.MaiSongList
+import net.drleelihr.bot.lib.maimai.difficultyIDTransform
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.MessageChain
 import net.mamoe.mirai.message.data.MessageChainBuilder
-import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
-
-
 
 
 suspend fun maiInfo(event:GroupMessageEvent,commandContent:MutableList<String>){
@@ -20,7 +18,7 @@ suspend fun maiInfo(event:GroupMessageEvent,commandContent:MutableList<String>){
      * base,ds -> 谱面定数（1.0-15.0）
      */
 
-    val songList=MaiSongList()
+    val songList= MaiSongList()
     val totalSongNum=songList.totalSongNum
 
     when(commandContent[0]){
@@ -111,7 +109,7 @@ suspend fun maiInfo(event:GroupMessageEvent,commandContent:MutableList<String>){
         else -> {
 
             commandContent.add(commandContent.size,"")
-            val difficultyID=difficultyIDTransform(commandContent[1])
+            val difficultyID= difficultyIDTransform(commandContent[1])
             val song=songList.id(commandContent[0].toInt())
             val songImage=song.getImageFileAsMessage(event)
 
