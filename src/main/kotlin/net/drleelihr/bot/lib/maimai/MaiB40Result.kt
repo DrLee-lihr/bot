@@ -59,40 +59,40 @@ class MaiB40Result {
         fun drawSong(): Image? {
 
             val bg = setLight(GaussianBlurUtil.blur(
-                resizeImage(ImageIO.read(song!!.getImageFile()), 400, 400), 10),-80)
+                resizeImage(ImageIO.read(song!!.getImageFile()), 200, 200), 10),-80)
             val g = bg.createGraphics()
 
-            g.font = Font("微软雅黑", Font.PLAIN, 50)
+            g.font = Font("微软雅黑", Font.PLAIN, 25)
             g.color = Color.WHITE
-            g.drawString(song!!.title, 20, 70)
+            g.drawString(song!!.title, 10, 35)
 
 
             val rate = ImageIO.read(File("$resourcePath\\maimai\\${rate}.png"))
             val diff = ImageIO.read(File("$resourcePath\\maimai\\" +
                     "${difficultyFullLevelTransform(difficultyIndex).replace(":","").lowercase()}.png"))
 
-            g.drawImage(diff,20,80,(diff.width*1.5).toInt(),(diff.height*1.5).toInt(),null)
-            g.drawImage(rate, 20, 115, (146*0.75).toInt(),(98*0.75).toInt(),null)
+            g.drawImage(diff,10,40,(diff.width*0.75).toInt(),(diff.height*0.75).toInt(),null)
+            g.drawImage(rate, 10, 57, (73*0.75).toInt(),(49*0.75).toInt(),null)
 
-            g.font=Font("Consolas",Font.PLAIN,40)
-            g.drawString("%.4f".format(achievements)+"%",148,170)
+            g.font=Font("Consolas",Font.PLAIN,20)
+            g.drawString("%.4f".format(achievements)+"%",74,85)
 
             if(fc!=""){
                 val file=ImageIO.read(File("$resourcePath\\maimai\\${fc}.png"))
-                g.drawImage(file,20,180,file.width*2,file.height*2,null)
+                g.drawImage(file,10,90,file.width,file.height,null)
             }
             if(fs!=""){
                 val file=ImageIO.read(File("$resourcePath\\maimai\\${fs}.png"))
-                g.drawImage(file,140,180,file.width*2,file.height*2,null)
+                g.drawImage(file,70,90,file.width,file.height,null)
             }
 
-            g.font=Font("Consolas",Font.PLAIN,35)
-            g.drawString("Base:${"%.1f".format(ds)} -> $rating",20,310)
+            g.font=Font("Consolas",Font.PLAIN,17)
+            g.drawString("Base:${"%.1f".format(ds)} -> $rating",10,155)
 
-            g.font=Font("Consolas",Font.PLAIN,50)
-            g.drawString("#${num+1} (${type})",20,380)
+            g.font=Font("Consolas",Font.PLAIN,25)
+            g.drawString("#${num+1} (${type})",10,190)
 
-            return bg.getScaledInstance(bg.width/2,bg.height/2, Image.SCALE_FAST)
+            return bg
         }
     }
 
