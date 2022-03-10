@@ -57,6 +57,9 @@ suspend fun maiSongRandom(event: GroupMessageEvent, content: String){
 
     println("歌曲版本判断完成：$type")
 
+    while (arguments[0] !in listOf('1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', '+', '＋', '歌')) {
+        arguments = arguments.drop(1)
+    }
     var level = ""
     try {
         while (arguments[0] in listOf('1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', '+', '＋', '歌')) {
