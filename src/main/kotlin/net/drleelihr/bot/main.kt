@@ -15,10 +15,10 @@ import net.mamoe.mirai.utils.BotConfiguration
 import java.nio.file.Path
 import kotlin.io.path.Path
 
-var enableCatchException=false
+var enableCatchException = false
 
 val projectPath: Path = Path("D:\\Dev\\bot")
-const val resourcePath="D:\\Dev\\bot\\src\\main\\resources"
+const val resourcePath = "D:\\Dev\\bot\\src\\main\\resources"
 
 var regexCommandList = mutableMapOf(
     Regex("\\[\\[.*?]]") to ::regexWiki,
@@ -36,10 +36,10 @@ var commandList = mutableMapOf(
     "m" to ::maiInfo,
 )
 
-suspend fun commandCheck(event:GroupMessageEvent){
-    try{
-        for(regex in regexCommandList.keys){
-            if(regex.find(event.message.content)!=null) {
+suspend fun commandCheck(event: GroupMessageEvent) {
+    try {
+        for (regex in regexCommandList.keys) {
+            if (regex.find(event.message.content) != null) {
                 regexCommandList[regex]?.let {
                     var b: MutableList<String> = mutableListOf()
                     for (c in regex.findAll(event.message.content).toMutableList()) {
@@ -49,22 +49,21 @@ suspend fun commandCheck(event:GroupMessageEvent){
                 }
             }
         }
-        for(regex in fullRegexCommandList.keys){
-            if(regex.matches(event.message.content)){
-                fullRegexCommandList[regex]!!(event,event.message.content)
+        for (regex in fullRegexCommandList.keys) {
+            if (regex.matches(event.message.content)) {
+                fullRegexCommandList[regex]!!(event, event.message.content)
             }
         }
-        if(event.message.content.startsWith("!")||event.message.content.startsWith("！")) {
-            val commandContent=event.message.content.substring(1).split(" ").toMutableList()
+        if (event.message.content.startsWith("!") || event.message.content.startsWith("！")) {
+            val commandContent = event.message.content.substring(1).split(" ").toMutableList()
             if (commandContent[0] in commandList.keys) {
-                val commandName=commandContent[0]
+                val commandName = commandContent[0]
                 commandContent.removeAt(0)
-                commandList[commandName]?.let { it(event,commandContent) }
+                commandList[commandName]?.let { it(event, commandContent) }
             }
         }
-    }
-    catch(e:Exception){
-        if(enableCatchException) reply(event,"指令在执行过程中出错：\n${e.message}")
+    } catch (e: Exception) {
+        if (enableCatchException) reply(event, "指令在执行过程中出错：\n${e.message}")
         else throw e
     }
 }
@@ -76,6 +75,6 @@ suspend fun main() {
         fileBasedDeviceInfo()
         protocol = BotConfiguration.MiraiProtocol.ANDROID_PHONE
     }.alsoLogin()
-    val abuseBotGroup= bot.getGroup(921834695L)
+    val abuseBotGroup = bot.getGroup(921834695L)
     bot.eventChannel.subscribeAlways<GroupMessageEvent> { event -> commandCheck(event) }
 }

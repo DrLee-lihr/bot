@@ -50,7 +50,7 @@ object GaussianBlurUtil {
         var pg: PixelGrabber? = null
         try {
             pg = PixelGrabber(im, 0, 0, w, h, pix, 0, w)
-            if (pg.grabPixels() != true) try {
+            if (!pg.grabPixels()) try {
                 throw AWTException("pg error" + pg.status())
             } catch (eq: Exception) {
                 eq.printStackTrace()

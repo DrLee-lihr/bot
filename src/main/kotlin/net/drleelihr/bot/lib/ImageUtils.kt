@@ -1,8 +1,6 @@
 package net.drleelihr.bot.lib
 
 import java.awt.Image
-import kotlin.Throws
-import java.io.IOException
 import java.awt.image.BufferedImage
 
 
@@ -19,7 +17,7 @@ private fun clamp(rgb: Int): Int {
     return if (rgb < 0) 0 else rgb
 }
 
-fun setLight(image:BufferedImage,param:Int): BufferedImage {
+fun setLight(image: BufferedImage, param: Int): BufferedImage {
     var rgb: Int
     var R: Int
     var G: Int

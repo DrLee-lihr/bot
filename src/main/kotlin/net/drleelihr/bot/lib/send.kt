@@ -5,7 +5,7 @@ import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.MessageReceipt
 import net.mamoe.mirai.message.data.*
 
-const val contentLengthLimit:Int=250
+const val contentLengthLimit: Int = 250
 
 
 class SongListDisplayStrategy(private val title: String) : ForwardMessage.DisplayStrategy {
@@ -16,34 +16,37 @@ class SongListDisplayStrategy(private val title: String) : ForwardMessage.Displa
 
 }
 
-suspend fun sendMessageOrForward(event: GroupMessageEvent,content: String,title: String="您请求的内容"): MessageReceipt<Group> {
-    if(content.length>=contentLengthLimit){
-        var singleContent=content.split("\n").toMutableList()
+suspend fun sendMessageOrForward(
+    event: GroupMessageEvent,
+    content: String,
+    title: String = "您请求的内容"
+): MessageReceipt<Group> {
+    if (content.length >= contentLengthLimit) {
+        var singleContent = content.split("\n").toMutableList()
         singleContent.remove("")
-        val bigContents= mutableListOf<String>()
-        var bigContent=""
-        for(i in singleContent.indices) {
-            bigContent+="${singleContent[i]}\n"
-            if(i%10==9){
+        val bigContents = mutableListOf<String>()
+        var bigContent = ""
+        for (i in singleContent.indices) {
+            bigContent += "${singleContent[i]}\n"
+            if (i % 10 == 9) {
                 bigContents.add(bigContent)
-                bigContent=""
+                bigContent = ""
             }
         }
-        if(singleContent.size%10!=0)bigContents.add(bigContent)
-        return event.group.sendMessage(buildForwardMessage(event.group,SongListDisplayStrategy(title)) {
-            for(singleBigContentIndex in bigContents.indices)add(event.bot, buildMessageChain {
+        if (singleContent.size % 10 != 0) bigContents.add(bigContent)
+        return event.group.sendMessage(buildForwardMessage(event.group, SongListDisplayStrategy(title)) {
+            for (singleBigContentIndex in bigContents.indices) add(event.bot, buildMessageChain {
                 +(bigContents[singleBigContentIndex] +
-                        "共${singleContent.size/10+(if(singleContent.size%10==0)0 else 1)}页，第${singleBigContentIndex+1}页")
+                        "共${singleContent.size / 10 + (if (singleContent.size % 10 == 0) 0 else 1)}页，第${singleBigContentIndex + 1}页")
             })
         })
-    }
-    else return event.group.sendMessage(content)
+    } else return event.group.sendMessage(content)
 }
 
-suspend fun send(event:GroupMessageEvent,content:String): MessageReceipt<Group> {
+suspend fun send(event: GroupMessageEvent, content: String): MessageReceipt<Group> {
     return event.group.sendMessage(content)
 }
 
-suspend fun send(event:GroupMessageEvent,content:MessageChain): MessageReceipt<Group> {
+suspend fun send(event: GroupMessageEvent, content: MessageChain): MessageReceipt<Group> {
     return event.group.sendMessage(content)
 }

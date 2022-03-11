@@ -1,15 +1,17 @@
 package net.drleelihr.bot.command
 
-import net.drleelihr.bot.lib.*
+import net.drleelihr.bot.lib.endl
 import net.drleelihr.bot.lib.maimai.MaiSong
 import net.drleelihr.bot.lib.maimai.MaiSongList
 import net.drleelihr.bot.lib.maimai.difficultyIDTransform
 import net.drleelihr.bot.lib.maimai.inLevel
+import net.drleelihr.bot.lib.reply
+import net.drleelihr.bot.lib.send
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.message.data.MessageChainBuilder
 
-infix fun String.containedBy(father:String):Boolean = father.lowercase().contains(this.lowercase())
-fun String.r()=this.reversed()
+infix fun String.containedBy(father: String): Boolean = father.lowercase().contains(this.lowercase())
+fun String.r() = this.reversed()
 
 
 /**
@@ -23,32 +25,32 @@ fun String.r()=this.reversed()
  *
  * 例3：随个红13.5
  */
-suspend fun maiSongRandom(event: GroupMessageEvent, content: String){
+suspend fun maiSongRandom(event: GroupMessageEvent, content: String) {
     println("成功进入查询函数")
-    val songList= MaiSongList()
-    val totalSongNum=songList.totalSongNum
+    val songList = MaiSongList()
+    val totalSongNum = songList.totalSongNum
     println("歌曲数据加载完成")
 
 
     var arguments = content.substring(2).reversed()
 
-    val type:Int=
+    val type: Int =
         when {
             "XD" containedBy arguments -> {
-                var x=""
-                arguments.split("XD").forEach{ a -> x+=a }
-                arguments=x
+                var x = ""
+                arguments.split("XD").forEach { a -> x += a }
+                arguments = x
                 1
             }
             "DS" containedBy arguments || "准标" containedBy arguments -> {
-                if("DS" containedBy arguments){
-                    var x=""
-                    arguments.split("DS").forEach{ a -> x+=a }
-                    arguments=x
-                } else{
-                    var x=""
-                    arguments.split("准标").forEach{ a -> x+=a }
-                    arguments=x
+                if ("DS" containedBy arguments) {
+                    var x = ""
+                    arguments.split("DS").forEach { a -> x += a }
+                    arguments = x
+                } else {
+                    var x = ""
+                    arguments.split("准标").forEach { a -> x += a }
+                    arguments = x
                 }
                 0
             }
@@ -66,7 +68,8 @@ suspend fun maiSongRandom(event: GroupMessageEvent, content: String){
             level += arguments[0]
             arguments = arguments.drop(1)
         }
-    } catch (_: Exception) {}
+    } catch (_: Exception) {
+    }
     level = level.reversed()
     if (level == "歌") level = ""
     println("歌曲定数分析完成:$level")
@@ -93,26 +96,26 @@ suspend fun maiSongRandom(event: GroupMessageEvent, content: String){
             charter = arguments.split("的")[0].r()
             artist = arguments.split("的")[1].r()
         } else charter = arguments.r()
-        arguments=""
+        arguments = ""
     } else if (arguments.startsWith("的")) {
         arguments = arguments.substring(1)
         if (arguments.contains("的写")) {
             charter = arguments.split("的写")[1].r()
             artist = arguments.split("的写")[0].r()
         } else artist = arguments.r()
-        arguments=""
+        arguments = ""
     }
     println(
         "谱师:$charter\n" +
                 "曲师:$artist"
     )
     println("剩余参数：$arguments")
-    if (arguments!=""){
-        reply(event,"错误：随机命令处理错误，请检查语法。")
+    if (arguments != "") {
+        reply(event, "错误：随机命令处理错误，请检查语法。")
     }
 
 
-    var chartResultList:MutableList<MaiSong.Chart> = mutableListOf()
+    var chartResultList: MutableList<MaiSong.Chart> = mutableListOf()
     for (chart in songList.chartsList) {
         if (artist containedBy chart.song.artist
             && charter containedBy chart.charter
@@ -122,7 +125,7 @@ suspend fun maiSongRandom(event: GroupMessageEvent, content: String){
                 level.contains(".") -> chart.ds == level.toFloat()
                 else -> chart.ds inLevel level
             }
-            && (if(difficulty != null)difficulty == chart.difficulty else true)
+            && (if (difficulty != null) difficulty == chart.difficulty else true)
         ) {
             chartResultList.add(chart)
         }
@@ -130,14 +133,18 @@ suspend fun maiSongRandom(event: GroupMessageEvent, content: String){
 
     var result: MaiSong.Chart
     try {
-        result=chartResultList.random()
-    }
-    catch (e:NoSuchElementException){
-        send(event, "错误：没有满足条件的曲目。"
-                + if(level in listOf("1+","1＋","2+","2＋","3+","3＋",
-                "4+","4＋","5+","5＋","6+","6＋",))
-            "\n提示：一部分5级和6级曲目虽然定数小数位大于等于7，但仍标为5级和6级；" +
-                    "1-4级则不存在定数小数位大于等于7的谱面；1+至6+这六个难度不存在；最低的带+的难度是7+。" else "")
+        result = chartResultList.random()
+    } catch (e: NoSuchElementException) {
+        send(
+            event, "错误：没有满足条件的曲目。"
+                    + if (level in listOf(
+                    "1+", "1＋", "2+", "2＋", "3+", "3＋",
+                    "4+", "4＋", "5+", "5＋", "6+", "6＋",
+                )
+            )
+                "\n提示：一部分5级和6级曲目虽然定数小数位大于等于7，但仍标为5级和6级；" +
+                        "1-4级则不存在定数小数位大于等于7的谱面；1+至6+这六个难度不存在；最低的带+的难度是7+。" else ""
+        )
         return
     }
     val messageChain = MessageChainBuilder()
